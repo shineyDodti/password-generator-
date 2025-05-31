@@ -220,7 +220,6 @@
       const text = passwordDisplay.textContent;
       navigator.clipboard.writeText(text).then(() => {
         copiedMessage.style.display = "block";
-        setTimeout(() => copiedMessage.style.display = "none", 2000);
       });
     }
 
