@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LOCK & KEY - Password Generator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .box {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      color: #222222;
+    }
+
+    header {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .toggle {
+      background-color: transparent;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      float: right;
+      margin-top: -10px;
+      color: #555;
+    }
+
+    .control {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    select, input {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+      color: #222;
+      min-width: 150px;
+    }
+
+    .password {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 20px 0;
+      word-break: break-word;
+      background: #f3f3f3;
+      padding: 15px;
+      border-radius: 8px;
+      min-height: 40px;
+      color: #111;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .copy, .reject {
+      padding: 10px 24px;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .copy {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .reject {
+      background-color: #d9534f;
+      color: white;
+    }
+
+    .copy:hover {
+      background-color: #43a047;
+    }
+
+    .reject:hover {
+      background-color: #c9302c;
+    }
+
+    .copied-message {
+      color: #4CAF50;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* DARK MODE */
+    .dark-mode body {
+      background: #1f1f1f;
+      color: white;
+    }
+
+    .dark-mode .box {
+      background: #2e2e2e;
+      color: white;
+    }
+
+    .dark-mode .password {
+      background: #444;
+      color: white;
+    }
+
+    .dark-mode select,
+    .dark-mode input {
+      background: #555;
+      color: white;
+      border: 1px solid #888;
+    }
+
+    .dark-mode .copied-message {
+      color: #66ff99;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <button class="toggle" id="themeToggle" onclick="toggleDarkMode()">🌙</button>
+    <header>LOCK & KEY</header>
+
+    <div class="control">
+      <div>
+        <label for="type">COMPLEXITY:</label><br />
+        <select id="type" onchange="autoGenerate()">
+          <option value="LOW">LOW</option>
+          <option value="STANDARD">STANDARD</option>
+          <option value="MODERATE">MODERATE</option>
+          <option value="HIGH" selected>HIGH</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="length">LENGTH:</label><br />
+        <input type="number" id="length" min="4" max="32" value="12" oninput="autoGenerate()" />
+      </div>
+    </div>
+
+    <br />
+    <label for="purpose"><strong>Select Purpose:</strong></label><br />
+    <select id="purpose" onchange="suggestForPurpose()">
+      <option value="">-- Choose --</option>
+      <option value="banking">Banking</option>
+      <option value="email">Email</option>
+      <option value="social">Social Media</option>
+      <option value="wifi">Wi-Fi Network</option>
+    </select>
+
+    <h3>Generated Password:</h3>
+    <div class="password" id="password">Please select options above</div>
+
+    <div class="actions">
+      <button class="copy" onclick="copyPassword()">Copy</button>
+      <button class="reject" onclick="autoGenerate()">Reject</button>
+    </div>
+    <div id="copiedMessage" class="copied-message">✅ Password copied!</div>
+  </div>
+
+  <script>
+    const passwordDisplay = document.getElementById('password');
+    const copiedMessage = document.getElementById('copiedMessage');
+    const themeToggle = document.getElementById('themeToggle');
+
+    function getCharset(type) {
+      const lower = "abcdefghijklmnopqrstuvwxyz";
+      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const digits = "0123456789";
+      const symbols = "!@#$%^&*()_+{}[]<>?/\\|~";
+      switch (type) {
+        case "LOW": return lower;
+        case "STANDARD": return lower + digits;
+        case "MODERATE": return lower + upper + digits;
+        case "HIGH": return lower + upper + digits + symbols;
+        default: return lower;
+      }
+    }
+
+    function autoGenerate() {
+      const type = document.getElementById('type').value;
+      const length = parseInt(document.getElementById('length').value) || 12;
+      const charset = getCharset(type);
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        const rand = Math.floor(Math.random() * charset.length);
+        password += charset[rand];
+      }
+      passwordDisplay.textContent = password;
+      copiedMessage.style.display = "none";
+    }
+
+    function copyPassword() {
+      const text = passwordDisplay.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        copiedMessage.style.display = "block";
+        setTimeout(() => copiedMessage.style.display = "none", 2000);
+      });
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      themeToggle.textContent = isDark ? "☀" : "🌙";
+    }
+
+    function suggestForPurpose() {
+      const purpose = document.getElementById('purpose').value;
+      let suggestion = "";
+
+      switch (purpose) {
+        case "banking":
+          suggestion = generateCustomPassword("HIGH", 14);
+          break;
+        case "email":
+          suggestion = generateCustomPassword("MODERATE", 12);
+          break;
+        case "social":
+          suggestion = generateCustomPassword("STANDARD", 10);
+          break;
+        case "wifi":
+          suggestion = generateCustomPassword("HIGH", 16);
+          break;
+        default:
+          suggestion = "Please select a valid purpose.";
+      }
+
+      passwordDisplay.textContent = suggestion;
+    }
+
+    function generateCustomPassword(level, length) {
+      const charset = getCharset(level);
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        const rand = Math.floor(Math.random() * charset.length);
+        password += charset[rand];
+      }
+      return password;
+    }
+
+    window.onload = function () {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+        themeToggle.textContent = "☀";
+      }
+      autoGenerate();
+    };
+  </script>
+</body>
+</html>
